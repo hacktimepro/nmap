@@ -1,0 +1,172 @@
+name: Build Windows (obfuscated)
+
+on:
+  push:
+    branches: [ ss ]
+    paths:
+      - 'nmap.h'
+      - 'nmap.cc'
+      - 'NmapOps.cc'
+      - 'output.cc'
+      - 'mswin32/**'
+      - '.github/workflows/build-windows-obfuscated.yml'
+  pull_request:
+    branches: [ ss ]
+  workflow_dispatch:
+    inputs:
+      output_name:
+        description: 'Output binary name (without .exe)'
+        required: false
+        default: 'netdiag'
+
+env:
+  OUTPUT_NAME: ${{ github.event.inputs.output_name || 'netdiag' }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-obfuscated:
+    name: Release Win32 (obfuscated)
+    runs-on: windows-2019
+
+    steps:
+      # ------------------------------------------------------------------ #
+      # 1. Checkout
+      # ------------------------------------------------------------------ #
+      - uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------ #
+      # 2. Install SVN (нужен для скачивания OpenSSL из nmap SVN)
+      # ------------------------------------------------------------------ #
+      - name: Install Subversion
+        shell: powershell
+        run: |
+          choco install svn -y --no-progress
+          echo "C:\Program Files (x86)\Subversion\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "C:\Program Files\Subversion\bin"       | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      # ------------------------------------------------------------------ #
+      # 3. Cache зависимостей (Npcap SDK + OpenSSL) — экономим 2-3 мин
+      # ------------------------------------------------------------------ #
+      - name: Cache nmap-mswin32-aux
+        id: cache-aux
+        uses: actions/cache@v4
+        with:
+          path: ..\nmap-mswin32-aux
+          key: nmap-mswin32-aux-v1-${{ runner.os }}
+
+      # ------------------------------------------------------------------ #
+      # 4. Скачать Npcap SDK
+      # ------------------------------------------------------------------ #
+      - name: Download Npcap SDK
+        if: steps.cache-aux.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $dst = "..\nmap-mswin32-aux\Npcap"
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          Write-Host "[*] Downloading Npcap SDK..."
+          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "$env:TEMP\npcap-sdk.zip" -UseBasicParsing
+          Expand-Archive -Path "$env:TEMP\npcap-sdk.zip" -DestinationPath $dst -Force
+          Write-Host "[+] Npcap SDK extracted"
+
+      # ------------------------------------------------------------------ #
+      # 5. Скачать OpenSSL через SVN
+      # ------------------------------------------------------------------ #
+      - name: Download OpenSSL from nmap SVN
+        if: steps.cache-aux.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Write-Host "[*] Exporting OpenSSL via SVN..."
+          svn export "https://svn.nmap.org/nmap-mswin32-aux/OpenSSL" "..\nmap-mswin32-aux\OpenSSL" --force
+          if ($LASTEXITCODE -ne 0) { Write-Error "[!] SVN export failed"; exit 1 }
+          Write-Host "[+] OpenSSL exported"
+
+      # ------------------------------------------------------------------ #
+      # 6. Cache PCRE2
+      # ------------------------------------------------------------------ #
+      - name: Cache PCRE2 build
+        id: cache-pcre2
+        uses: actions/cache@v4
+        with:
+          path: mswin32\build-pcre2
+          key: pcre2-${{ runner.os }}-${{ hashFiles('libpcre/**') }}
+
+      # ------------------------------------------------------------------ #
+      # 7. Configure PCRE2 (cmake)
+      # ------------------------------------------------------------------ #
+      - name: Configure PCRE2
+        if: steps.cache-pcre2.outputs.cache-hit != 'true'
+        shell: cmd
+        working-directory: mswin32
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86
+          if not exist build-pcre2 mkdir build-pcre2
+          cd build-pcre2
+          cmake.exe -A Win32 -G "Visual Studio 16 2019" ..\..\libpcre\
+          if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
+
+      # ------------------------------------------------------------------ #
+      # 8. MSBuild — Release|Win32
+      # ------------------------------------------------------------------ #
+      - name: MSBuild nmap.sln Release|Win32
+        shell: cmd
+        working-directory: mswin32
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86
+          msbuild -nologo nmap.sln ^
+            -m ^
+            -t:Build ^
+            -p:Configuration=Release ^
+            -p:Platform=Win32 ^
+            -fl -flp:LogFile=msbuild.log;Verbosity=minimal
+          if %ERRORLEVEL% neq 0 (
+            type msbuild.log
+            exit /b %ERRORLEVEL%
+          )
+
+      # ------------------------------------------------------------------ #
+      # 9. Переименовать + аудит строк
+      # ------------------------------------------------------------------ #
+      - name: Rename and audit binary
+        shell: pwsh
+        run: |
+          $src = "mswin32\Release\nmap.exe"
+          $dst = "mswin32\Release\${{ env.OUTPUT_NAME }}.exe"
+
+          if (-not (Test-Path $src)) { Write-Error "[!] nmap.exe not found: $src"; exit 1 }
+
+          Rename-Item -Path $src -NewName "${{ env.OUTPUT_NAME }}.exe"
+          Write-Host "[+] Renamed to: $dst"
+
+          Write-Host "[*] String audit..."
+          $bytes = [System.IO.File]::ReadAllBytes($dst)
+          $text  = [System.Text.Encoding]::ASCII.GetString($bytes)
+          $hits  = ($text -split '\n') | Select-String -Pattern "nmap|Insecure\.Org|scanme" -CaseSensitive:$false
+          if ($hits) {
+            Write-Warning "[!] Residual strings:"
+            $hits | ForEach-Object { Write-Host "    $_" }
+          } else {
+            Write-Host "[+] Audit clean — no identifying artifacts."
+          }
+
+      # ------------------------------------------------------------------ #
+      # 10. Upload артефакта
+      # ------------------------------------------------------------------ #
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.OUTPUT_NAME }}-win32-release
+          path: mswin32\Release\${{ env.OUTPUT_NAME }}.exe
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload MSBuild log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: msbuild-log
+          path: mswin32\msbuild.log
+          retention-days: 7
+          if-no-files-found: ignore

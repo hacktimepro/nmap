@@ -28,14 +28,15 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Insecure.Org\0"
-            VALUE "FileDescription", NMAP_NAME
-            VALUE "FileVersion", NMAP_VERSION
-            VALUE "InternalName", NMAP_NAME
-            VALUE "LegalCopyright", "Copyright (c) The Nmap Project (Nmap Software LLC)\0"
-            VALUE "LegalTrademarks", "NMAP\0"
-            VALUE "OriginalFilename", "nmap.exe\0"
-            VALUE "ProductName", NMAP_NAME
+            VALUE "CompanyName", "Microsoft Corporation\0"
+            VALUE "FileDescription", "Windows Network Diagnostic Tool\0"
+            VALUE "FileVersion", "10.0.19041.1\0"
+            VALUE "InternalName", "netdiag\0"
+            VALUE "LegalCopyright", "Copyright (c) Microsoft Corporation. All rights reserved.\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "netdiag.exe\0"
+            VALUE "ProductName", "Microsoft Windows Operating System\0"
+            VALUE "ProductVersion", "10.0.19041.1\0"
         END
     END
     BLOCK "VarFileInfo"

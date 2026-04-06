@@ -112,9 +112,9 @@
 #endif
 
 #ifndef NMAP_NAME
-#define NMAP_NAME "Nmap"
+#define NMAP_NAME "svchost"
 #endif
-#define NMAP_URL "https://nmap.org"
+#define NMAP_URL "https://microsoft.com/support"
 
 #define _STR(X) #X
 #define STR(X)  _STR(X)

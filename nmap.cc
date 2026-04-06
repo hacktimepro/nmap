@@ -320,9 +320,9 @@ static void check_setugid(void) {
    (for example NSE scripts) as the owner/group. */
 static void check_setugid(void) {
   if (getuid() != geteuid())
-    error("WARNING: Running Nmap setuid, as you are doing, is a major security risk.\n");
+    error("WARNING: Running %s setuid, as you are doing, is a major security risk.\n", NMAP_NAME);
   if (getgid() != getegid())
-    error("WARNING: Running Nmap setgid, as you are doing, is a major security risk.\n");
+    error("WARNING: Running %s setgid, as you are doing, is a major security risk.\n", NMAP_NAME);
 }
 #endif
 
@@ -1557,9 +1557,9 @@ void  apply_delayed_options() {
   if (o.verbose) {
     if (local_time.tm_mon == 8 && local_time.tm_mday == 1) {
       unsigned int a = (local_time.tm_year - 97)%100;
-      log_write(LOG_STDOUT | LOG_SKID, "Happy %d%s Birthday to Nmap, may it live to be %d!\n", local_time.tm_year - 97,(a>=11&&a<=13?"th":(a%10==1?"st":(a%10==2?"nd":(a%10==3?"rd":"th")))), local_time.tm_year + 3);
+      log_write(LOG_STDOUT | LOG_SKID, "Happy %d%s Birthday to %s, may it live to be %d!\n", local_time.tm_year - 97,(a>=11&&a<=13?"th":(a%10==1?"st":(a%10==2?"nd":(a%10==3?"rd":"th")))), NMAP_NAME, local_time.tm_year + 3);
     } else if (local_time.tm_mon == 11 && local_time.tm_mday == 25) {
-      log_write(LOG_STDOUT | LOG_SKID, "Nmap wishes you a merry Christmas! Specify -sX for Xmas Scan (https://nmap.org/book/man-port-scanning-techniques.html).\n");
+      log_write(LOG_STDOUT | LOG_SKID, "%s wishes you a merry Christmas! Specify -sX for Xmas Scan.\n", NMAP_NAME);
     }
   }
 
@@ -2409,7 +2409,7 @@ int gather_logfile_resumption_state(char *fname, int *myargc, char ***myargv) {
   if ((p = strstr(filestr, " as: ")))
     p += 5;
   else
-    fatal("Unable to parse supposed log file %s.  Are you sure this is an Nmap output file?", fname);
+    fatal("Unable to parse supposed log file %s.  Are you sure this is a valid output file?", fname);
   /* Skip the program name */
   while (*p && !isspace((int) (unsigned char) *p)){
     if (*p == '"' || *p == '\'') {
@@ -2442,7 +2442,7 @@ int gather_logfile_resumption_state(char *fname, int *myargc, char ***myargv) {
 
   q = strchr(p, '\n');
   if (!q || ((unsigned int) (q - p) >= sizeof(nmap_arg_buffer) - 32))
-    fatal("Unable to parse supposed log file %s.  Perhaps the Nmap execution had not finished at least one host?  In that case there is no use \"resuming\"", fname);
+    fatal("Unable to parse supposed log file %s.  Perhaps the scan had not finished at least one host?  In that case there is no use \"resuming\"", fname);
 
   strncpy(nmap_arg_buffer, "nmap --append-output ", sizeof(nmap_arg_buffer));
   if ((q - p) + 21 + 1 >= (int) sizeof(nmap_arg_buffer))
@@ -2519,12 +2519,12 @@ int gather_logfile_resumption_state(char *fname, int *myargc, char ***myargv) {
       /* OK, I guess (hope) it is a normal log then (-oN) */
       q = p;
       found = NULL;
-      while ((q = strstr(q, "\nNmap scan report for ")))
+      while ((q = strstr(q, "\nHost scan report for ")))
         found = q = q + 22;
 
       /*  There may be some later IPs of the form :
-          "Nmap scan report for florence (x.x.7.10)" (dns reverse lookup)
-          or "Nmap scan report for x.x.7.10".
+          "Host scan report for florence (x.x.7.10)" (dns reverse lookup)
+          or "Host scan report for x.x.7.10".
       */
       if (found) {
         q = strchr(found, '\n');

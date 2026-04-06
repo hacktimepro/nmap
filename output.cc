@@ -1386,9 +1386,9 @@ static char *num_to_string_sigdigits(double d, int digits) {
 void write_host_header(const Target *currenths) {
   if ((currenths->flags & HOST_UP) || o.verbose || o.always_resolve) {
     if (currenths->flags & HOST_UP) {
-      log_write(LOG_PLAIN, "Nmap scan report for %s\n", currenths->NameIP());
+      log_write(LOG_PLAIN, "Host scan report for %s\n", currenths->NameIP());
     } else if (currenths->flags & HOST_DOWN) {
-      log_write(LOG_PLAIN, "Nmap scan report for %s [host down", currenths->NameIP());
+      log_write(LOG_PLAIN, "Host scan report for %s [host down", currenths->NameIP());
       if (o.reason)
         log_write(LOG_PLAIN, ", %s", target_reason_str(currenths));
       log_write(LOG_PLAIN, "]\n");
