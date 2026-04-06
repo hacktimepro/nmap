@@ -311,6 +311,7 @@ static void printusage() {
          "  %s -v -iR 10000 -Pn -p 80\n"
          "SEE DOCUMENTATION AT %s FOR MORE OPTIONS AND EXAMPLES\n",
          NMAP_NAME, NMAP_VERSION, NMAP_URL, NMAP_NAME, NMAP_NAME, NMAP_NAME, NMAP_NAME, NMAP_URL);
+  fflush(stdout);
 }
 
 #ifdef WIN32
