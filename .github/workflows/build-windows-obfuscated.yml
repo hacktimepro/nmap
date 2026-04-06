@@ -117,13 +117,34 @@ jobs:
           }
 
       # ------------------------------------------------------------------ #
-      # 7. Upload артефакт
+      # 7. Собрать MSVC runtime DLL рядом с бинарём
+      #    Бинарь собран /MD, поэтому нужны 3 DLL для работы на чистой системе
+      # ------------------------------------------------------------------ #
+      - name: Bundle MSVC runtime DLLs
+        shell: pwsh
+        run: |
+          $dst = "mswin32\Release"
+          $sys32 = "$env:SystemRoot\System32"
+          $dlls  = @("MSVCP140.dll", "VCRUNTIME140.dll", "VCRUNTIME140_1.dll")
+
+          foreach ($dll in $dlls) {
+            $src = Join-Path $sys32 $dll
+            if (Test-Path $src) {
+              Copy-Item $src $dst
+              Write-Host "[+] Bundled: $dll"
+            } else {
+              Write-Warning "[!] Not found: $src"
+            }
+          }
+
+      # ------------------------------------------------------------------ #
+      # 8. Upload артефакт (exe + DLL в одной папке)
       # ------------------------------------------------------------------ #
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.OUTPUT_NAME }}-win32-release
-          path: mswin32\Release\${{ env.OUTPUT_NAME }}.exe
+          path: mswin32\Release\
           retention-days: 14
           if-no-files-found: error
 
