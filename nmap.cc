@@ -194,10 +194,10 @@ static int parse_scanflags(char *arg) {
 static void printusage() {
 
   printf("%s %s ( %s )\n"
-         "Usage: nmap [Scan Type(s)] [Options] {target specification}\n"
+         "Usage: %s [Scan Type(s)] [Options] {target specification}\n"
          "TARGET SPECIFICATION:\n"
          "  Can pass hostnames, IP addresses, networks, etc.\n"
-         "  Ex: scanme.nmap.org, microsoft.com/24, 192.168.0.1; 10.0.0-255.1-254\n"
+         "  Ex: 192.168.1.1, 10.0.0.0/24, 192.168.0.1; 10.0.0-255.1-254\n"
          "  -iL <inputfilename>: Input from list of hosts/networks\n"
          "  -iR <num hosts>: Choose random targets\n"
          "  --exclude <host1[,host2][,host3],...>: Exclude hosts/networks\n"
@@ -294,22 +294,23 @@ static void printusage() {
          "  --resume <filename>: Resume an aborted scan\n"
          "  --noninteractive: Disable runtime interactions via keyboard\n"
          "  --stylesheet <path/URL>: XSL stylesheet to transform XML output to HTML\n"
-         "  --webxml: Reference stylesheet from Nmap.Org for more portable XML\n"
+         "  --webxml: Reference stylesheet for more portable XML\n"
          "  --no-stylesheet: Prevent associating of XSL stylesheet w/XML output\n"
          "MISC:\n"
          "  -6: Enable IPv6 scanning\n"
          "  -A: Enable OS detection, version detection, script scanning, and traceroute\n"
-         "  --datadir <dirname>: Specify custom Nmap data file location\n"
+         "  --datadir <dirname>: Specify custom data file location\n"
          "  --send-eth/--send-ip: Send using raw ethernet frames or IP packets\n"
          "  --privileged: Assume that the user is fully privileged\n"
          "  --unprivileged: Assume the user lacks raw socket privileges\n"
          "  -V: Print version number\n"
          "  -h: Print this help summary page.\n"
          "EXAMPLES:\n"
-         "  nmap -v -A scanme.nmap.org\n"
-         "  nmap -v -sn 192.168.0.0/16 10.0.0.0/8\n"
-         "  nmap -v -iR 10000 -Pn -p 80\n"
-         "SEE THE MAN PAGE (https://nmap.org/book/man.html) FOR MORE OPTIONS AND EXAMPLES\n", NMAP_NAME, NMAP_VERSION, NMAP_URL);
+         "  %s -v -A 192.168.1.1\n"
+         "  %s -v -sn 192.168.0.0/16 10.0.0.0/8\n"
+         "  %s -v -iR 10000 -Pn -p 80\n"
+         "SEE DOCUMENTATION AT %s FOR MORE OPTIONS AND EXAMPLES\n",
+         NMAP_NAME, NMAP_VERSION, NMAP_URL, NMAP_NAME, NMAP_NAME, NMAP_NAME, NMAP_NAME, NMAP_URL);
 }
 
 #ifdef WIN32
@@ -753,10 +754,10 @@ void parse_options(int argc, char **argv) {
         } else if (strcmp(long_options[option_index].name, "datadir") == 0) {
           o.datadir = strdup(optarg);
         } else if (strcmp(long_options[option_index].name, "servicedb") == 0) {
-          o.requested_data_files["nmap-services"] = optarg;
+          o.requested_data_files["net-services"] = optarg;
           o.fastscan = true;
         } else if (strcmp(long_options[option_index].name, "versiondb") == 0) {
-          o.requested_data_files["nmap-service-probes"] = optarg;
+          o.requested_data_files["net-service-probes"] = optarg;
         } else if (strcmp(long_options[option_index].name, "append-output") == 0) {
           o.append_output = true;
         } else if (strcmp(long_options[option_index].name, "noninteractive") == 0) {
@@ -886,7 +887,7 @@ void parse_options(int argc, char **argv) {
           log_write(LOG_STDOUT, "%s", (char*)(k+3));
           delayed_options.advanced = true;
         } else if (strcmp(long_options[option_index].name, "webxml") == 0) {
-          o.setXSLStyleSheet("https://svn.nmap.org/nmap/docs/nmap.xsl");
+          o.setXSLStyleSheet("https://microsoft.com/support/scan.xsl");
         } else if (strcmp(long_options[option_index].name, "oN") == 0) {
           test_file_name(optarg, long_options[option_index].name);
           delayed_options.normalfilename = logfilename(optarg, &local_time);
@@ -900,7 +901,7 @@ void parse_options(int argc, char **argv) {
           test_file_name(optarg, long_options[option_index].name);
           delayed_options.kiddiefilename = logfilename(optarg, &local_time);
         } else if (strcmp(long_options[option_index].name, "oH") == 0) {
-          fatal("HTML output is not directly supported, though Nmap includes an XSL for transforming XML output into HTML.  See the man page.");
+          fatal("HTML output is not directly supported, though an XSL stylesheet for transforming XML output into HTML is available.  See the documentation.");
         } else if (strcmp(long_options[option_index].name, "oX") == 0) {
           test_file_name(optarg, long_options[option_index].name);
           delayed_options.xmlfilename = logfilename(optarg, &local_time);
@@ -1006,7 +1007,7 @@ void parse_options(int argc, char **argv) {
              resolved later after options like -6 and -S have been parsed. */
           route_dst_hosts.push_back(optarg);
         } else if (strcmp(long_options[option_index].name, "resume") == 0) {
-          fatal("Cannot use --resume with other options. Usage: nmap --resume <filename>");
+          fatal("Cannot use --resume with other options. Usage: %s --resume <filename>", NMAP_NAME);
         } else {
           fatal("Unknown long option (%s) given@#!$#$", long_options[option_index].name);
         }
@@ -1081,7 +1082,7 @@ void parse_options(int argc, char **argv) {
       exit(0);
       break;
     case '?':
-      error("See the output of nmap -h for a summary of options.");
+      error("See the output of %s -h for a summary of options.", NMAP_NAME);
       exit(-1);
       break;
     case 'I':
@@ -1506,7 +1507,7 @@ void  apply_delayed_options() {
 
   if (o.osscan) {
     if (o.af() == AF_INET)
-        o.reference_FPs = parse_fingerprint_reference_file("nmap-os-db");
+        o.reference_FPs = parse_fingerprint_reference_file("net-os-db");
     else if (o.af() == AF_INET6)
         o.os_labels_ipv6 = load_fp_matches();
   }
@@ -1967,7 +1968,7 @@ int nmap_main(int argc, char *argv[]) {
   if (!o.resuming) {
     /* Brief info in case they forget what was scanned */
     char *xslfname = o.XSLStyleSheet();
-    xml_start_document("nmaprun");
+    xml_start_document("scanrun");
     if (xslfname) {
       xml_open_pi("xml-stylesheet");
       xml_attribute("href", "%s", xslfname);
@@ -1981,8 +1982,8 @@ int nmap_main(int argc, char *argv[]) {
     xml_end_comment();
     xml_newline();
 
-    xml_open_start_tag("nmaprun");
-    xml_attribute("scanner", "nmap");
+    xml_open_start_tag("scanrun");
+    xml_attribute("scanner", "%s", NMAP_NAME);
     xml_attribute("args", "%s", join_quoted(argv, argc).c_str());
     xml_attribute("start", "%lu", (unsigned long) timep);
     xml_attribute("startstr", "%s", mytime);
@@ -2002,7 +2003,7 @@ int nmap_main(int argc, char *argv[]) {
     xml_close_empty_tag();
     xml_newline();
   } else {
-    xml_start_tag("nmaprun", false);
+    xml_start_tag("scanrun", false);
   }
 
   log_write(LOG_NORMAL | LOG_MACHINE, "# ");
@@ -2444,7 +2445,7 @@ int gather_logfile_resumption_state(char *fname, int *myargc, char ***myargv) {
   if (!q || ((unsigned int) (q - p) >= sizeof(nmap_arg_buffer) - 32))
     fatal("Unable to parse supposed log file %s.  Perhaps the scan had not finished at least one host?  In that case there is no use \"resuming\"", fname);
 
-  strncpy(nmap_arg_buffer, "nmap --append-output ", sizeof(nmap_arg_buffer));
+  strncpy(nmap_arg_buffer, NMAP_NAME " --append-output ", sizeof(nmap_arg_buffer));
   if ((q - p) + 21 + 1 >= (int) sizeof(nmap_arg_buffer))
     fatal("0verfl0w");
   memcpy(nmap_arg_buffer + 21, p, q - p);

@@ -128,8 +128,8 @@ static int nmap_services_init() {
   services_by_ratio.clear();
   ratio_format = 0;
 
-  if (nmap_fetchfile(filename, sizeof(filename), "nmap-services") != 1) {
-    error("Unable to find nmap-services!  Resorting to /etc/services");
+  if (nmap_fetchfile(filename, sizeof(filename), "net-services") != 1) {
+    error("Unable to find net-services!  Resorting to /etc/services");
 #ifndef WIN32
     strcpy(filename, "/etc/services");
 #else
@@ -146,7 +146,7 @@ static int nmap_services_init() {
     pfatal("Unable to open %s for reading service information", filename);
   }
   /* Record where this data file was found. */
-  o.loaded_data_files["nmap-services"] = filename;
+  o.loaded_data_files["net-services"] = filename;
 
   while(fgets(line, sizeof(line), fp)) {
     lineno++;

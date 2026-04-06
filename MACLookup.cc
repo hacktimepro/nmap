@@ -93,8 +93,8 @@ static void mac_prefix_init() {
   int lineno = 0;
 
   /* Now it is time to read in all of the entries ... */
-  if (nmap_fetchfile(filename, sizeof(filename), "nmap-mac-prefixes") != 1){
-    error("Cannot find nmap-mac-prefixes: Ethernet vendor correlation will not be performed");
+  if (nmap_fetchfile(filename, sizeof(filename), "net-mac-prefixes") != 1){
+    error("Cannot find net-mac-prefixes: Ethernet vendor correlation will not be performed");
     return;
   }
 
@@ -104,7 +104,7 @@ static void mac_prefix_init() {
     return;
   }
   /* Record where this data file was found. */
-  o.loaded_data_files["nmap-mac-prefixes"] = filename;
+  o.loaded_data_files["net-mac-prefixes"] = filename;
 
   while(fgets(line, sizeof(line), fp)) {
     lineno++;

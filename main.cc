@@ -139,9 +139,9 @@ int main(int argc, char *argv[]) {
   mtrace();
 #endif
 
-  if ((cptr = getenv("NMAP_ARGS"))) {
-    if (Snprintf(command, sizeof(command), "nmap %s", cptr) >= (int) sizeof(command)) {
-        error("Warning: NMAP_ARGS variable is too long, truncated");
+  if ((cptr = getenv("SCAN_ARGS"))) {
+    if (Snprintf(command, sizeof(command), "%s %s", NMAP_NAME, cptr) >= (int) sizeof(command)) {
+        error("Warning: SCAN_ARGS variable is too long, truncated");
     }
     /* copy rest of command-line arguments */
     for (i = 1; i < argc && strlen(command) + strlen(argv[i]) + 1 < sizeof(command); i++) {
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
     }
     myargc = arg_parse(command, &myargv);
     if (myargc < 1) {
-      fatal("NMAP_ARGS variable could not be parsed");
+      fatal("SCAN_ARGS variable could not be parsed");
     }
     ret = nmap_main(myargc, myargv);
     arg_parse_free(myargv);
