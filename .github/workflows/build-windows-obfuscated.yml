@@ -3,13 +3,6 @@ name: Build Windows (obfuscated)
 on:
   push:
     branches: [ ss ]
-    paths:
-      - 'nmap.h'
-      - 'nmap.cc'
-      - 'NmapOps.cc'
-      - 'output.cc'
-      - 'mswin32/**'
-      - '.github/workflows/build-windows-obfuscated.yml'
   pull_request:
     branches: [ ss ]
   workflow_dispatch:
