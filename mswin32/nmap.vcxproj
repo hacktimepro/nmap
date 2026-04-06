@@ -408,6 +408,10 @@
       <Project>{6FC03DB9-D882-3161-ABEE-A44A395E05B3}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\libz\contrib\vstudio\vc16\zlibstat.vcxproj">
+      <Project>{745DEC58-EBB3-47A9-A9B8-4C6627C01BF8}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\libssh2\win32\libssh2.vcxproj">
       <Project>{ed957342-e43b-496e-92d9-4c76b525bdf5}</Project>
       <Private>false</Private>
