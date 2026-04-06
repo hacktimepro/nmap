@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   build-obfuscated:
-    name: Release Win32 (obfuscated)
+    name: Release x64 static (obfuscated)
     runs-on: windows-latest
 
     steps:
@@ -39,16 +39,35 @@ jobs:
       - uses: actions/checkout@v4
 
       # ------------------------------------------------------------------ #
-      # 2. Install SVN — нужен Build.bat для скачивания OpenSSL
+      # 2. Install SVN + x64 OpenSSL (static /MT libs через choco)
       # ------------------------------------------------------------------ #
-      - name: Install Subversion
+      - name: Install dependencies
         shell: pwsh
         run: |
           choco install svn -y --no-progress
-          # SVN может быть в разных местах — добавляем оба
           "C:\Program Files (x86)\Subversion\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           "C:\Program Files\Subversion\bin"       | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           Write-Host "[+] SVN installed"
+
+          # x64 OpenSSL с static /MT libs (Shining Light Productions)
+          choco install openssl -y --no-progress
+          Write-Host "[+] OpenSSL installed"
+
+          # Устанавливаем пути для MSBuild через GITHUB_ENV
+          $opensslBase = "C:\Program Files\OpenSSL-Win64"
+          if (-not (Test-Path $opensslBase)) {
+            $opensslBase = "C:\Program Files\OpenSSL"
+          }
+          # Static /MT libs находятся в lib\VC\x64\MT\
+          $libDir = "$opensslBase\lib\VC\x64\MT"
+          if (-not (Test-Path $libDir)) {
+            # Fallback: обычные import libs (для /MD)
+            $libDir = "$opensslBase\lib"
+          }
+          "OPENSSL_INC_DIR=$opensslBase\include" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "OPENSSL_LIB_DIR=$libDir"              | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "[+] OPENSSL_INC_DIR=$opensslBase\include"
+          Write-Host "[+] OPENSSL_LIB_DIR=$libDir"
 
       # ------------------------------------------------------------------ #
       # 3. Cache nmap-mswin32-aux (Npcap SDK + OpenSSL)
@@ -117,34 +136,13 @@ jobs:
           }
 
       # ------------------------------------------------------------------ #
-      # 7. Собрать MSVC runtime DLL рядом с бинарём
-      #    Бинарь собран /MD, поэтому нужны 3 DLL для работы на чистой системе
-      # ------------------------------------------------------------------ #
-      - name: Bundle MSVC runtime DLLs
-        shell: pwsh
-        run: |
-          $dst = "mswin32\Release"
-          $sys32 = "$env:SystemRoot\System32"
-          $dlls  = @("MSVCP140.dll", "VCRUNTIME140.dll", "VCRUNTIME140_1.dll")
-
-          foreach ($dll in $dlls) {
-            $src = Join-Path $sys32 $dll
-            if (Test-Path $src) {
-              Copy-Item $src $dst
-              Write-Host "[+] Bundled: $dll"
-            } else {
-              Write-Warning "[!] Not found: $src"
-            }
-          }
-
-      # ------------------------------------------------------------------ #
-      # 8. Upload артефакт (exe + DLL в одной папке)
+      # 7. Upload артефакт — только exe (статический бинарь, DLL не нужны)
       # ------------------------------------------------------------------ #
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.OUTPUT_NAME }}-win32-release
-          path: mswin32\Release\
+          name: ${{ env.OUTPUT_NAME }}-x64-release
+          path: mswin32\Release\${{ env.OUTPUT_NAME }}.exe
           retention-days: 14
           if-no-files-found: error
 

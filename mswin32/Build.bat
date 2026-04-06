@@ -10,7 +10,7 @@ if "%VCCONFIG%" == "" set VCCONFIG=Release
 :: Try VS 2019 first, then fall back to latest
 "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -version "[16.0,17.0)" -property installationPath > "%TEMP%\vspath.txt" 2>nul
 for /f "usebackq delims=" %%i in ("%TEMP%\vspath.txt") do (
-  call "%%i\VC\Auxiliary\Build\vcvarsall.bat" x86
+  call "%%i\VC\Auxiliary\Build\vcvarsall.bat" amd64
   set VS_GENERATOR=Visual Studio 16 2019
   goto :generator_set
 )
@@ -19,7 +19,7 @@ for /f "usebackq delims=" %%i in ("%TEMP%\vspath.txt") do (
 "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -version "[16.0,)" -latest -property installationPath > "%TEMP%\vspath.txt" 2>nul
 "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -version "[16.0,)" -latest -property installationVersion > "%TEMP%\vsver.txt" 2>nul
 
-for /f "usebackq delims=" %%i in ("%TEMP%\vspath.txt") do call "%%i\VC\Auxiliary\Build\vcvarsall.bat" x86
+for /f "usebackq delims=" %%i in ("%TEMP%\vspath.txt") do call "%%i\VC\Auxiliary\Build\vcvarsall.bat" amd64
 
 :: Determine generator from version
 set VS_GENERATOR=Visual Studio 17 2022
@@ -70,10 +70,10 @@ if "%TARGET%" == "Clean" (
 echo Using CMake Generator: %VS_GENERATOR%
 mkdir build-pcre2
 cd build-pcre2
-cmake.exe -A Win32 -G "%VS_GENERATOR%" ..\..\libpcre\ || goto :QUIT
+cmake.exe -A x64 -G "%VS_GENERATOR%" ..\..\libpcre\ || goto :QUIT
 cd ..
 )
-msbuild -nologo nmap.sln -m -t:%TARGET% -p:Configuration="%VCCONFIG%" -p:Platform="Win32" -fl
+msbuild -nologo nmap.sln -m -t:%TARGET% -p:Configuration="%VCCONFIG%" -p:Platform="x64" -fl
 goto :QUIT
 
 :vars

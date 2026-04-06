@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
+    <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
+    <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -16,14 +16,14 @@
     <ProjectGuid>{ED957342-E43B-496E-92D9-4C76B525BDF5}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
@@ -31,35 +31,35 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>.\Release_dll\</OutDir>
     <IntDir>.\Release_dll\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>.\Debug_dll\</OutDir>
     <IntDir>.\Debug_dll\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <Optimization>MaxSpeed</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\..\libz;..\..\..\nmap-mswin32-aux\OpenSSL\include;..\win32;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libz;$(OPENSSL_INC_DIR);..\win32;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;LIBSSH2_WIN32;LIBSSH2_OPENSSL;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Release_dll\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Release_dll\libssh2.pch</PrecompiledHeaderOutputFile>
@@ -71,7 +71,7 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TypeLibraryName>.\Release_dll\libssh2.tlb</TypeLibraryName>
       <MkTypLibCompatible>true</MkTypLibCompatible>
-      <TargetEnvironment>Win32</TargetEnvironment>
+      <TargetEnvironment>x64</TargetEnvironment>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -81,22 +81,13 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\Release_dll\libssh2.bsc</OutputFile>
     </Bscmake>
-    <Link>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <LinkDLL>true</LinkDLL>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
-      <OutputFile>.\Release_dll\libssh2.dll</OutputFile>
-      <ImportLibrary>.\Release_dll\libssh2.lib</ImportLibrary>
-      <AdditionalDependencies>ws2_32.lib;libcrypto.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\libz\contrib\vstudio\vc16\x86\ZlibDllReleaseWithoutAsm;..\..\..\nmap-mswin32-aux\OpenSSL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-    </Link>
+    <Lib>
+      <OutputFile>.\Release_dll\libssh2.lib</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <Optimization>Disabled</Optimization>
@@ -104,7 +95,7 @@
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\..\nmap-mswin32-aux\OpenSSL\include;..\..\libz;..\win32;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPENSSL_INC_DIR);..\..\libz;..\win32;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;LIBSSH2_WIN32;LIBSSH2_OPENSSL;_LIB;LIBSSH2DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Debug_dll\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Debug_dll\libssh2.pch</PrecompiledHeaderOutputFile>
@@ -117,7 +108,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TypeLibraryName>.\Debug_dll\libssh2.tlb</TypeLibraryName>
       <MkTypLibCompatible>true</MkTypLibCompatible>
-      <TargetEnvironment>Win32</TargetEnvironment>
+      <TargetEnvironment>x64</TargetEnvironment>
     </Midl>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -127,17 +118,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\Debug_dll\libssh2.bsc</OutputFile>
     </Bscmake>
-    <Link>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <LinkDLL>true</LinkDLL>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <OutputFile>.\Debug_dll\libssh2.dll</OutputFile>
-      <ImportLibrary>.\Debug_dll\libssh2.lib</ImportLibrary>
-      <AdditionalDependencies>ws2_32.lib;libcrypto.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\nmap-mswin32-aux\OpenSSL\lib;..\..\libz\contrib\vstudio\vc16\x86\ZlibDllDebugWithoutAsm;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
+    <Lib>
+      <OutputFile>.\Debug_dll\libssh2.lib</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\agent.c" />
@@ -196,16 +179,6 @@
     <ClInclude Include="..\src\userauth_kbd_packet.h" />
     <ClInclude Include="..\src\wincng.h" />
     <ClInclude Include="libssh2_config.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\libz\contrib\vstudio\vc16\zlibvc.vcxproj">
-      <Project>{8fd826f8-3739-44e6-8cc8-997122e53b8d}</Project>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
